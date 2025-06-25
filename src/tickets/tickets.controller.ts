@@ -43,10 +43,39 @@ export class TicketsController {
         ? UserRole.accountant
         : UserRole.corporateSecretary;
 
+    if (type === TicketType.registrationAddressChange) {
+      const existingTicket = await Ticket.findOne({
+        where: {
+          companyId,
+          type: TicketType.registrationAddressChange,
+          status: TicketStatus.open,
+        }
+      });
+      if (existingTicket) {
+        throw new ConflictException(
+          'There is already an open ticket for registration address change for this company.',
+        );
+      }
+    }
+
     const assignees = await User.findAll({
       where: { companyId, role: userRole },
       order: [['createdAt', 'DESC']],
     });
+
+    if (!assignees.length && type === TicketType.registrationAddressChange) {
+      const directorUsers = await User.findAll({
+        where: { companyId, role: UserRole.director },
+        order: [['createdAt', 'DESC']],
+      });
+      if (directorUsers.length > 1) {
+        throw new ConflictException(
+          `Multiple users with role ${UserRole.director}. Cannot create a ticket`,
+        );
+      } else if (directorUsers.length === 1) {
+        assignees.push(directorUsers[0]);
+      }
+    }
 
     if (!assignees.length)
       throw new ConflictException(
