@@ -5,8 +5,11 @@ import {
   TicketCategory,
   TicketStatus,
   TicketType,
+  TicketCategoryByType,
+  UserRoleByTicketType
 } from '../../db/models/Ticket';
 import { User, UserRole } from '../../db/models/User';
+import { Op } from 'sequelize';
 
 interface newTicketDto {
   type: TicketType;
@@ -33,16 +36,10 @@ export class TicketsController {
   async create(@Body() newTicketDto: newTicketDto) {
     const { type, companyId } = newTicketDto;
 
-    const category =
-      type === TicketType.managementReport
-        ? TicketCategory.accounting
-        : TicketCategory.corporate;
+    const category = TicketCategoryByType[type];
+    let userRole = UserRoleByTicketType[type];
 
-    const userRole =
-      type === TicketType.managementReport
-        ? UserRole.accountant
-        : UserRole.corporateSecretary;
-
+    // If the ticket type is registrationAddressChange, check for existing open tickets
     if (type === TicketType.registrationAddressChange) {
       const existingTicket = await Ticket.findOne({
         where: {
@@ -58,23 +55,17 @@ export class TicketsController {
       }
     }
 
-    const assignees = await User.findAll({
+    let assignees = await User.findAll({
       where: { companyId, role: userRole },
       order: [['createdAt', 'DESC']],
     });
 
     if (!assignees.length && type === TicketType.registrationAddressChange) {
-      const directorUsers = await User.findAll({
-        where: { companyId, role: UserRole.director },
+      userRole = UserRole.director;
+      assignees = await User.findAll({
+        where: { companyId, role: userRole },
         order: [['createdAt', 'DESC']],
       });
-      if (directorUsers.length > 1) {
-        throw new ConflictException(
-          `Multiple users with role ${UserRole.director}. Cannot create a ticket`,
-        );
-      } else if (directorUsers.length === 1) {
-        assignees.push(directorUsers[0]);
-      }
     }
 
     if (!assignees.length)
@@ -82,7 +73,7 @@ export class TicketsController {
         `Cannot find user with role ${userRole} to create a ticket`,
       );
 
-    if (userRole === UserRole.corporateSecretary && assignees.length > 1)
+    if ([UserRole.corporateSecretary, UserRole.director].includes(userRole) && assignees.length > 1)
       throw new ConflictException(
         `Multiple users with role ${userRole}. Cannot create a ticket`,
       );
@@ -96,6 +87,20 @@ export class TicketsController {
       type,
       status: TicketStatus.open,
     });
+
+    // If the ticket type is strikeOff, we will close all other open tickets for the company
+    if (type === TicketType.strikeOff) {
+      await Ticket.update(
+        { status: TicketStatus.resolved },
+        {
+          where: {
+            companyId,
+            status: TicketStatus.open,
+            type: { [Op.ne]: TicketType.strikeOff },
+          },
+        },
+      );
+    }
 
     const ticketDto: TicketDto = {
       id: ticket.id,
