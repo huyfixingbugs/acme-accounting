@@ -17,9 +17,12 @@ export class ReportsController {
   @Post()
   @HttpCode(201)
   generate() {
+    const start = performance.now();
+
     this.reportsService.accounts();
     this.reportsService.yearly();
     this.reportsService.fs();
-    return { message: 'finished' };
+
+    return { message: `finished in ${((performance.now() - start) / 1000).toFixed(2)}` };
   }
 }

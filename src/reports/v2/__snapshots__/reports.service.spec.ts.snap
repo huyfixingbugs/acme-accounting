@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ReportsServiceV2 should generate reports: accounts-v2.csv 1`] = `
+"Account,Balance
+Fixed Assets,26113198.37
+Tax Expense,39436232.24
+Interest Expense,-1672198.58
+Accounts Payable,21371673.27
+Cash,-5952833.60
+Accounts Receivable,-29817119.16
+Unearned Revenue,5330650.00
+Accrued Liabilities,-1082450.57
+Salaries Expense,41094245.55
+Common Stock,16645462.73
+Loan Payable,2581401.93
+Prepaid Expenses,-35602278.62
+Cost of Goods Sold,6047460.55
+Dividends Payable,-29637869.40
+Retained Earnings,-17815584.94
+Inventory,-19732455.29
+Rent Expense,2710797.64
+Sales Tax Payable,-37837055.25
+Sales Revenue,14229202.79
+Utilities Expense,16428280.46"
+`;
+
+exports[`ReportsServiceV2 should generate reports: fs-v2.csv 1`] = `
+"Basic Financial Statement
+
+Income Statement
+Sales Revenue,14229202.79
+Cost of Goods Sold,6047460.55
+Salaries Expense,41094245.55
+Rent Expense,2710797.64
+Utilities Expense,16428280.46
+Interest Expense,-1672198.58
+Tax Expense,39436232.24
+Net Income,-89815615.07
+
+Balance Sheet
+Assets
+Cash,-5952833.60
+Accounts Receivable,-29817119.16
+Inventory,-19732455.29
+Fixed Assets,26113198.37
+Prepaid Expenses,-35602278.62
+Total Assets,-64991488.30
+
+Liabilities
+Accounts Payable,21371673.27
+Loan Payable,2581401.93
+Sales Tax Payable,-37837055.25
+Accrued Liabilities,-1082450.57
+Unearned Revenue,5330650.00
+Dividends Payable,-29637869.40
+Total Liabilities,-39273650.02
+
+Equity
+Common Stock,16645462.73
+Retained Earnings,-17815584.94
+Retained Earnings (Net Income),-89815615.07
+Total Equity,-90985737.28
+
+Assets = Liabilities + Equity, -64991488.30 = -130259387.30"
+`;
+
+exports[`ReportsServiceV2 should generate reports: yearly-v2.csv 1`] = `
+"Financial Year,Cash Balance
+2019,195299.48
+2020,-4944891.10
+2021,12017491.75
+2022,-18878324.27
+2023,-15796925.76
+2024,21454516.30"
+`;
